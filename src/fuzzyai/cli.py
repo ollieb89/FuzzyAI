@@ -206,13 +206,17 @@ async def run_webui(args: argparse.Namespace) -> None:
     else:
         port = find_available_port(8080)
     
+    webui_path = str(Path(__file__).parent / "webui.py")
     process = subprocess.Popen(
-        ["streamlit", "run", "src/fuzzyai/webui.py", "--server.port", str(port)],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        [sys.executable, "-m", "streamlit", "run", webui_path, "--server.port", str(port), "--server.address", "0.0.0.0", "--server.headless", "true", "--server.fileWatcherType", "none"],
     )
     
     await asyncio.sleep(2)
+    
+    if process.poll() is not None:
+        print("Web UI failed to start.")
+        return
+
     print(f"Web UI is running at http://localhost:{port}, Use Ctrl+C to exit")
     process.wait()
 
